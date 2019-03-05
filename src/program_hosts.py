@@ -1,7 +1,7 @@
 from colorama import Fore
 from infrastructure.switchlang import switch
 import infrastructure.state as state
-
+import services.data_services as svc
 
 def run():
     print(' ****************** Welcome host **************** ')
@@ -48,10 +48,10 @@ def show_commands():
 
 def create_account():
     print(' ****************** REGISTER **************** ')
-    # TODO: Get name & email
-    # TODO: Create account, set as logged in.
+    name = input('Qual o seu nome? ')
+    email = input('Seu email? ')
 
-    print(" -------- NOT IMPLEMENTED -------- ")
+    state.active_account = svc.create_account(name, email)
 
 
 def log_into_account():

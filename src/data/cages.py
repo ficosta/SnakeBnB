@@ -1,10 +1,10 @@
 import mongoengine
 import datetime
 
-from data.booking.Booking
+from data.booking import Booking
 
 
-class Cage:
+class Cage(mongoengine.Document):
     registered_date: mongoengine.DateTimeField(default=datetime.datetime.now)
 
     name = mongoengine.StringField(required=True)
