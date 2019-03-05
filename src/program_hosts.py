@@ -1,7 +1,9 @@
 from colorama import Fore
+from dateutil import parser
+
 from infrastructure.switchlang import switch
 import infrastructure.state as state
-import src.services.data_services as svc
+import services.data_services as svc
 
 def run():
     print(' ****************** Welcome host **************** ')
@@ -90,10 +92,11 @@ def register_cage():
     has_toys = input("Tem brinquedos [y, n]? ").lower().startswith('y')
     allow_dangerous = input("Pode receber cobras venenosas [y, n]? ").lower().startswith('y')
     name = input("Qual o nome? ")
+    price = float(input("Qual o valor? "))
 
-    svc.register_cage(
+    cage = svc.register_cage(
         state.active_account, name,
-        allow_dangerous, has_toys, carpeted, meters
+        allow_dangerous, has_toys, carpeted, meters, price
     )
 
     state.reload_account()
@@ -111,15 +114,50 @@ def list_cages(suppress_header=False):
         return
 
     cages = svc.find_cages_for_user(state.active_account)
+    print(f"Você tem {len(cages)} gaiolas.")
 
-    print(" -------- NOT IMPLEMENTED -------- ")
+    for idx, c in enumerate(cages):
+        print(f' {idx}.  {c.name} tem {c.square_meters} metros.')
+        for b in c.bookings:
+            reserva = 'Sim' if b.booked_date is not None else 'Não'
+            print(f"Reserva: {b.check_in_date}, {(b.check_out_date - b.check_in_date).days} dias. Reservado? {reserva}")
 
 
 def update_availability():
     print(' ****************** Add available date **************** ')
 
-    # TODO: Require an account
-    # TODO: list cages
+    if not state.active_account:
+        error_msg("Voce precisa estar logado para continuar.")
+        return
+
+    list_cages(suppress_header=True)
+
+    cage_number = input("Digite o numero da gaiola: ")
+    if not cage_number.strip():
+        error_msg("Cancelado")
+        print()
+        return
+
+    cage_number = int(cage_number)
+
+    cages = svc.find_cages_for_user(state.active_account)
+    selected_cage = cages[cage_number - 1]
+
+    success_msg(f"Gaiola {selected_cage.name} selecionada")
+
+    start_date = parser.parse(
+        input("Digite a data disponivel [yyyy-mm-dd]:")
+    )
+    days = int(input("Quantos dias?"))
+
+    svc.add_available_date(
+        selected_cage,
+        start_date,
+        days
+    )
+
+    success_msg(f"Data adicionada para a gaiola {selected_cage.name}")
+
     # TODO: Choose cage
     # TODO: Set dates, save to DB.
 

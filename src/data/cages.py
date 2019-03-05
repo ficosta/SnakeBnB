@@ -12,7 +12,7 @@ class Cage(mongoengine.Document):
     square_meters = mongoengine.FloatField(required=True)
     is_carpeted = mongoengine.BooleanField(required=True)
     has_toys = mongoengine.BooleanField(required=True)
-    allow_dangereous_snakes = mongoengine.BooleanField(default=False)
+    allow_dangerous_snakes = mongoengine.BooleanField(default=False)
 
     bookings = mongoengine.EmbeddedDocumentListField(Booking)
 
