@@ -1,7 +1,7 @@
 from colorama import Fore
 from infrastructure.switchlang import switch
 import infrastructure.state as state
-import services.data_services as svc
+import src.services.data_services as svc
 
 def run():
     print(' ****************** Welcome host **************** ')
@@ -49,7 +49,7 @@ def show_commands():
 def create_account():
     print(' ****************** REGISTER **************** ')
     name = input('Qual o seu nome? ')
-    email = input('Seu email? ')
+    email = input('Seu email? ').strip().lower()
 
     old_account = svc.find_account_by_email(email)
 
@@ -63,28 +63,54 @@ def create_account():
 def log_into_account():
     print(' ****************** LOGIN **************** ')
 
-    # TODO: Get email
-    # TODO: Find account in DB, set as logged in.
+    email = input("Qual o seu email? ").strip().lower()
+    account = svc.find_account_by_email(email)
 
-    print(" -------- NOT IMPLEMENTED -------- ")
+    if not account:
+        error_msg(f"Nao foi possivel encontrar suas conta com o email: {email}")
+
+    state.active_account = account
+    success_msg("Login com sucesso")
 
 
 def register_cage():
     print(' ****************** REGISTER CAGE **************** ')
 
-    # TODO: Require an account
-    # TODO: Get info about cage
-    # TODO: Save cage to DB.
+    if not state.active_account:
+        error_msg("Voce precisa estar logado para continuar.")
+        return
 
-    print(" -------- NOT IMPLEMENTED -------- ")
+    meters = input("Quantos metros quadrados é a gaiola? ")
+    if not meters:
+        error_msg("Cancelado")
+        return
+
+    meters = float(meters)
+    carpeted = input("Tem carpete [y, n]? ").lower().startswith('y')
+    has_toys = input("Tem brinquedos [y, n]? ").lower().startswith('y')
+    allow_dangerous = input("Pode receber cobras venenosas [y, n]? ").lower().startswith('y')
+    name = input("Qual o nome? ")
+
+    svc.register_cage(
+        state.active_account, name,
+        allow_dangerous, has_toys, carpeted, meters
+    )
+
+    state.reload_account()
+    success_msg(f"Gaiola com o id {cage.id} registrada")
 
 
-def list_cages(supress_header=False):
-    if not supress_header:
+
+
+def list_cages(suppress_header=False):
+    if not suppress_header:
         print(' ******************     Your cages     **************** ')
 
-    # TODO: Require an account
-    # TODO: Get cages, list details
+    if not state.active_account:
+        error_msg("Voce precisa estar logado para continuar.")
+        return
+
+    cages = svc.find_cages_for_user(state.active_account)
 
     print(" -------- NOT IMPLEMENTED -------- ")
 
